@@ -71,7 +71,7 @@ python dataset_retagged.py --dataset $PATH_SPLIT_SEQ --predicted_lu $PATH_PREDIC
 - `--predicted_lu` refers the path with the predictions of the leaf unary chains by a given model, for the same split (make sure this file is in a TSV format)
 - `--output` refers the path where to store the merged file (the `.seq_r`file)
 
-The `.seq_r`will be used to train the second sequential model (the one used two predict *only* the common ancestors and the lowest common constituent between w_t and w_(t+1), but not any leaf unary chain).
+The `.seq_r`will be used to train the second sequential model (the one used to predict *only* the common ancestors and the lowest common constituent between w_t and w_(t+1), but not any leaf unary chain).
 
 ## Executing and evaluating the pre-trained models
 
