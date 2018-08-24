@@ -1,0 +1,3 @@
+[submodule "NCRFpp"]
+	path = NCRFpp
+	url = https://github.com/aghie/NCRFpp
