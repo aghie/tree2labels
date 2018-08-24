@@ -26,13 +26,13 @@ The script **`install.sh`** automatically installs the mentioned packages, assum
 ```
 python dataset.py --train $PATH_TRAINSET --dev $PATH_DEVSET --test $PATH_TESTSET --output $PATH_OUTPUT_DIR --treebank $ANAME [--os] [--root_label] [--encode_unaries]
 ```
-`--train` refers the path to the parenthesized training set
-`--dev` refers the path to the parenthesized dev set
-`--test` refers the path to the parenthesized test set
-`--treebank` indicates the name that you want to give to your treebank.
-`--os` adds both dummy beginning- and end-of-sentence tokens. 
-`--root_label` uses a special label ROOT instead of an integer number for those words that only have in common the root of the sentence.
-`--encode_unaries` will encode leaf unary chains (check the paper) as a part of the label (see the case of the token Mary, for example). The output will be three files `$ANAME-train.seq_lu`, `$ANAME-dev.seq_lu` and `$ANAME-test.seq_lu` located at `$PATH_OUTPUT_DIR`
+- `--train` refers the path to the parenthesized training set
+- `--dev` refers the path to the parenthesized dev set
+- `--test` refers the path to the parenthesized test set
+- `--treebank` indicates the name that you want to give to your treebank.
+- `--os` adds both dummy beginning- and end-of-sentence tokens. 
+- `--root_label` uses a special label ROOT instead of an integer number for those words that only have in common the root of the sentence.
+- `--encode_unaries` will encode leaf unary chains (check the paper) as a part of the label (see the case of the token Mary, for example). The output will be three files `$ANAME-train.seq_lu`, `$ANAME-dev.seq_lu` and `$ANAME-test.seq_lu` located at `$PATH_OUTPUT_DIR`
 
 > NOTE: The current version uses a computation trick where sentences of length one with leaf unary chains, are encoded as ROOT_LEAF-UNARY-CHAIN instead as NONE_LEAF-UNARY-CHAIN if `--root_label` is activated.
 
@@ -67,9 +67,9 @@ To address constituent parsing according to this retagging strategy, in our work
 ```
 python dataset_retagged.py --dataset $PATH_SPLIT_SEQ --predicted_lu $PATH_PREDICTED_LU_OUTPUT --output $PATH_SAVE_OUTPUT.seq_r
 ``` 
-`--dataset`refers the path to a split in .seq format
-`--predicted_lu` refers the path with the predictions of the leaf unary chains by a given model, for the same split (make sure this file is in a TSV format)
-`--output` refers the path where to store the merged file (the `.seq_r`file)
+- `--dataset`refers the path to a split in .seq format
+- `--predicted_lu` refers the path with the predictions of the leaf unary chains by a given model, for the same split (make sure this file is in a TSV format)
+- `--output` refers the path where to store the merged file (the `.seq_r`file)
 
 The `.seq_r`will be used to train the second sequential model (the one used two predict *only* the common ancestors and the lowest common constituent between w_t and w_(t+1), but not any leaf unary chain).
 
@@ -84,14 +84,14 @@ We include pre-trained models based on three baselines: (1) Conditional Random F
 ```
 taskset --cpu-list 1 python baselines.py --test $PATH_TEST.seq_lu  --gold $PATH_PARENTHESIZED_TEST_SET --model $PATH_MODEL --baseline (crf|mlp|emlp) --status test --gpu (True|False) --output_decode $PATH_SAVE_OUTPUT [--retagger] --evalb $EVALB
 ```
-`--test` refers the path to the input file (use the `.seq_lu` file).
-`--gold` refers the path to the file with the parenthesized trees
-`--model` refers the path to the model and its name to recover its different components.
-`--baseline` the type of the model.
-`--gpu` True or False to indicate whether to use GPU or CPU.
-`--output_decode` refers the path to store the output.
-`--retagger` is used when the output is obtained by an architecture that first uses a model trained on the `.lu` dataset (to predict the leaf unary changes) and then that output is merged with the original postags and fed to a second model trained on the `.seq_r` dataset.
-`--evalb` refers the path to the official evalb script.
+- `--test` refers the path to the input file (use the `.seq_lu` file).
+- `--gold` refers the path to the file with the parenthesized trees
+- `--model` refers the path to the model and its name to recover its different components.
+- `--baseline` the type of the model.
+- `--gpu` True or False to indicate whether to use GPU or CPU.
+- `--output_decode` refers the path to store the output.
+- `--retagger` is used when the output is obtained by an architecture that first uses a model trained on the `.lu` dataset (to predict the leaf unary changes) and then that output is merged with the original postags and fed to a second model trained on the `.seq_r` dataset.
+- `--evalb` refers the path to the official evalb script.
 
 The scripts `scripts/run_baselines.sh` and `scripts/run_baselines_ch.sh` show how to run a number of baselines, trained on the PTB and CTB treebanks, using `baselines.py`
 
@@ -108,14 +108,14 @@ The scripts `scripts/run_baselines.sh` and `scripts/run_baselines_ch.sh` show ho
 taskset --cpu-list 1 python run_ncrfpp.py --test $PATH_TEST.seq_lu  --gold $PATH_PARENTHESIZED_TEST_SET --model $PATH_MODEL --status test --gpu $USE_GPU (True|False) --output $PATH_SAVE_OUTPUT [--retagger] --evalb $EVALB --ncrfpp $NCRFPP
 ``` 
 
-`--test` refers the path to the input file (`.seq_lu` format).
-`--gold` refers the path to the file with the parenthesized trees.
-`--model` refers the path to the model and its name to recover its different components.
-`--gpu` True or False to indicate whether to use GPU or CPU.
-`--output` refers the path to store the output.
-`--retagger` is used when the output is obtained by an architecture that first uses a model trained on the `.lu` dataset (to predict the leaf unary changes) and the that output is merged with the original postags and fed to a second model trained on the `.seq_r` dataset.
-`--evalb` refers the path to the official evalb script.
-`--ncrfpp` refers the path to the NCRFpp source code folder.
+- `--test` refers the path to the input file (`.seq_lu` format).
+- `--gold` refers the path to the file with the parenthesized trees.
+- `--model` refers the path to the model and its name to recover its different components.
+- `--gpu` True or False to indicate whether to use GPU or CPU.
+- `--output` refers the path to store the output.
+- `--retagger` is used when the output is obtained by an architecture that first uses a model trained on the `.lu` dataset (to predict the leaf unary changes) and the that output is merged with the original postags and fed to a second model trained on the `.seq_r` dataset.
+- `--evalb` refers the path to the official evalb script.
+- `--ncrfpp` refers the path to the NCRFpp source code folder.
 
 The scripts `scripts/run_ncrfpp.sh` and `scripts/run_ncrfpp_ch.sh` show how to run a number of baselines, , trained on the PTB and CTB treebanks, using `run_ncrfpp.py`.
 
