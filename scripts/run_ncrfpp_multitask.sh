@@ -42,9 +42,8 @@ python ../run_ncrfpp.py \
 
 
 ###################################################
-#							 MULTI-TASK MODELS
+# + MULTITASK LEARNING
 ###################################################
-
 
 taskset --cpu-list 1 \
 python ../run_ncrfpp.py \
@@ -58,5 +57,38 @@ python ../run_ncrfpp.py \
 --evalb $EVALB \
 --ncrfpp $NCRFPP #> $LOGS/ptb.multitask.3R.-2.$TEST_NAME.$USE_GPU.log 2>&1
 
+
+###################################################
+# + BEST AUX TASK
+###################################################
+
+taskset --cpu-list 1 \
+python ../run_ncrfpp.py \
+--test $INPUT \
+--gold $TEST_PATH \
+--model $MODELS/ptb.multitask.3R.-2.pre_lev \
+--status test  \
+--gpu $USE_GPU \
+--multitask \
+--output $OUTPUT/ptb.multitask.3R.-2.pre_lev.$TEST_NAME.$USE_GPU.txt \
+--evalb $EVALB \
+--ncrfpp $NCRFPP #> $LOGS/ptb.multitask.3R.-2.pre_lev.$TEST_NAME.$USE_GPU.log 2>&1 
+
+
+###################################################
+# + REINFORCEMENT LEARNING
+###################################################
+
+taskset --cpu-list 1 \
+python ../run_ncrfpp.py \
+--test $INPUT \
+--gold $TEST_PATH \
+--model $HOME_NCRFpp/parsing_models/ptb-RL/ptb.RL.multitask.3R.-2.pre_lev \
+--status test  \
+--gpu $USE_GPU \
+--output $OUTPUT/ptb.RL.multitask.3R.-2.pre_lev.$TEST_NAME.$USE_GPU.txt  \
+--evalb $EVALB \
+--multitask \
+--ncrfpp $NCRFPP #> $LOGS/ptb.RL.multitask.3R.-2.pre_lev.$TEST_NAME.$USE_GPU.log 2>&1
 
 
