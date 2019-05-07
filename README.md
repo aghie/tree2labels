@@ -1,6 +1,6 @@
 # Constituent Parsing as Sequence Labeling
 
-This repository contains the source code from the paper "Constituent Parsing as Sequence Labeling". 
+This repository contains the sources for the paper "Better, Faster, Stronger Sequence Tagging Constituent Parsers", published at NAACL 2019. 
 
 ## Prerrequisites
 
