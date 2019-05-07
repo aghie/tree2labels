@@ -9,6 +9,37 @@ import copy
 import sys
 import time
 from tree import SeqTree, RelativeLevelTreeEncoder
+from logging import warning
+
+
+
+
+def rebuild_input_sentence(lines):
+    
+    if len(lines[0].split("\t")) > 3:
+                    
+        sentence = [ (l.split("\t")[0],  
+                      l.split("\t")[1]+"##"+"|".join(feat for feat in l.split("\t")[2:-1]
+                                                     if feat != "-")+"##") 
+                                    
+                                for l in lines]                    
+    else:
+        sentence = [tuple(l.split("\t")[0:2]) for l in lines]
+    return sentence
+    
+
+
+"""
+Returns a labels as a tuple of 3 elements: (level,label,leaf_unary_chain)
+"""
+def split_label(label, split_char):
+    if label in ["-BOS-","-EOS-","NONE"]:
+        return (label,"-EMPTY-","-EMPTY-")
+    if len(label.split(split_char)) == 2:
+        return (label.split(split_char)[0], label.split(split_char)[1],"-EMPTY-")
+    
+    return tuple(label.split(split_char))
+
 
 
 """
@@ -22,6 +53,15 @@ def flat_list(l):
     return flat_l
 
 
+"""
+Determines if a stringx can be converted into a string
+"""
+def is_int(x):
+    try:
+        int(x)
+        return True
+    except ValueError:
+        return False
 
 """
 Auxiliar function to compute the accuracy in an homogeneous way respect
@@ -29,6 +69,8 @@ to the enriched approach and the .seq_lu format
 """
 def get_enriched_labels_for_retagger(preds,unary_preds):
  
+    #TODO: Update for SPRML corpus
+    warning("The model will not work well if + is not an unique joint char for collapsed branches (update for SPRML)")
     new_preds = []
     for zpreds, zunaries in zip(preds, unary_preds):
         aux = []
@@ -52,9 +94,11 @@ Transforms a list of sentences and predictions (labels) into parenthesized trees
 @param labels: A list of list of predictions
 @return A list of parenthesized trees
 """
-def sequence_to_parenthesis(sentences,labels):
+#NEWJOINT
+def sequence_to_parenthesis(sentences,labels,join_char="~", split_char="@"):
+#def sequence_to_parenthesis(sentences,labels,join_char="+"):
     parenthesized_trees = []  
-    relative_encoder = RelativeLevelTreeEncoder()
+    relative_encoder = RelativeLevelTreeEncoder(join_char=join_char, split_char=split_char)
     
     f_max_in_common = SeqTree.maxincommon_to_tree
     f_uncollapse = relative_encoder.uncollapse
@@ -66,17 +110,13 @@ def sequence_to_parenthesis(sentences,labels):
             sentence = []
             preds = []
             for ((word,postag), pred) in zip(sentences[noutput][1:-1],output[1:-1]):
-                        
-                if len(pred.split("_"))==3: #and "+" in pred.split("_")[2]:
-                    sentence.append((word,pred.split("_")[2]+"+"+postag))             
+
+                if len(pred.split(split_char))==3: #and "+" in pred.split("_")[2]:
+                    sentence.append((word,pred.split(split_char)[2]+join_char+postag))             
                               
                 else:
                     sentence.append((word,postag)) 
-                
-                #TODO: This is currently needed as a workaround for the retagging strategy and sentences of length one
-#                 if len(output)==3 and output[1] == "ROOT":
-#                     pred = "NONE"     
-                
+                        
                 preds.append(pred)
             tree = f_max_in_common(preds, sentence, relative_encoder)
                         
@@ -92,16 +132,20 @@ def sequence_to_parenthesis(sentences,labels):
                         tree = tree[0]
 
             #Uncollapsing the root. Rare needed
-            if "+" in tree.label():
-                aux = SeqTree(tree.label().split("+")[0],[])
-                aux.append(SeqTree("+".join(tree.label().split("+")[1:]), tree ))
+            if join_char in tree.label():
+                aux = SeqTree(tree.label().split(join_char)[0],[])
+                aux.append(SeqTree(join_char.join(tree.label().split(join_char)[1:]), tree ))
                 tree = aux
+
             tree = f_uncollapse(tree)
             
 
             total_posprocessing_time+= time.time()-init_parenthesized_time
             #To avoid problems when dumping the parenthesized tree to a file
             aux = tree.pformat(margin=100000000)
+            
+            if aux.startswith("( ("): #Ad-hoc workarounf for sentences of length 1 in German SPRML
+                aux = aux[2:-1]
             parenthesized_trees.append(aux)
 
     return parenthesized_trees 

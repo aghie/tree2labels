@@ -4,6 +4,7 @@ import copy
 import itertools
 from numpy import insert
 from collections import Counter
+from numpy.core.defchararray import index
 
 """
 Class to manage the transformation of a constituent tree into a sequence of labels
@@ -30,7 +31,8 @@ class SeqTree(Tree):
     @param root_label: Set to true to include a special label to words directly attached to the root
     @param encode_unary_leaf: Set to true to encode leaf unary chains as a part of the label
     """
-    def to_maxincommon_sequence(self,is_binary=False, root_label=False, encode_unary_leaf=False):
+    def to_maxincommon_sequence(self,is_binary=False, root_label=False, encode_unary_leaf=False,
+                                abs_top=None, abs_neg_gap=None):
         
         if self.encoding is None: raise ValueError("encoding attribute is None")
         leaves_paths = []
@@ -39,7 +41,9 @@ class SeqTree(Tree):
         unary_sequence =  [s.label() for s in self.subtrees(lambda t: t.height() == 2)] #.split("+")
         return self.encoding.to_maxincommon_sequence(leaves, leaves_paths, unary_sequence, binarized=is_binary, 
                                                      root_label= root_label,
-                                                     encode_unary_leaf=encode_unary_leaf)
+                                                     encode_unary_leaf=encode_unary_leaf,
+                                                     abs_top=abs_top,
+                                                     abs_neg_gap=abs_neg_gap)
 
     """
     Transforms a predicted sequence into a constituent tree
@@ -67,7 +71,9 @@ class SeqTree(Tree):
             if isinstance(child,Tree):
                 common_path = copy.deepcopy(current_path)
                 
-                common_path.append(child.label()+"-"+str(i))
+                #common_path.append(child.label())
+                common_path.append(child.label()+"*"+str(i))
+                #common_path.append(child.label()+"-"+str(i))
                 child.path_to_leaves(common_path, paths)
             else:
                 for element in current_path:
@@ -88,7 +94,16 @@ class RelativeLevelTreeEncoder(object):
         
     ROOT_LABEL = "ROOT"
     NONE_LABEL = "NONE"
-    
+
+
+    SPLIT_LABEL_SURNAME_SYMBOL = "*"
+
+
+    def __init__(self, join_char="~",split_char="@"):
+        self.join_char = join_char
+        self.split_char = split_char
+
+
     #TODO: The binarized option has not beend tested/evaluated
     """
     Transforms a tree into a sequence encoding the "deepest-in-common" phrase between words t and t+1
@@ -101,37 +116,40 @@ class RelativeLevelTreeEncoder(object):
     @param encode_unary_leaf: Set to true to encode leaf unary chains as a part of the label
     """  
     def to_maxincommon_sequence(self, leaves, leaves_paths, unary_sequence, 
-                                binarized, root_label, encode_unary_leaf=False):
+                                binarized, root_label, encode_unary_leaf=False,
+                                abs_top=None, abs_neg_gap=None):
         
         sequence = []
         previous_ni = 0
         ni=0
         relative_ni = 0 
+        previous_relative_ni=0
         
         for j,leaf in enumerate(leaves):
             
             #It is the last real word of the sentence
             if j == len(leaves)-1: 
-                                
-                if encode_unary_leaf and "+" in unary_sequence[j]:
-                    encoded_unary_leaf = "_"+"+".join(unary_sequence[j].split("+")[:-1]) #The PoS tags is not encoded
+                
+                #NEWJOINT     
+                if encode_unary_leaf and self.join_char in unary_sequence[j]:
+                    encoded_unary_leaf = self.split_char+self.join_char.join(unary_sequence[j].split(self.join_char)[:-1]) #The PoS tags is not encoded
                 else:
-                    encoded_unary_leaf = ""
- 
-#               #This corresponds to the implementation without the computation trick
-#                sequence.append((self.NONE_LABEL+encoded_unary_leaf))
-#                break
+                    encoded_unary_leaf = ""          
+
 
                 #TODO: This is a computation trick that seemed to work better in the dev set
                 #Sentences of length on are annotated with ROOT_UNARYCHAIN instead NONE_UNARYCHAIN                 
                 if (root_label and len(leaves)==1):
-                    sequence.append(self.ROOT_LABEL+encoded_unary_leaf)
+                    #TODO: Check if this is working for the combined "top-down" encoding
+                    #sequence.append(self.ROOT_LABEL+encoded_unary_leaf)
+                    sequence.append("1"+self.ROOT_LABEL+encoded_unary_leaf)
                 else:
                     sequence.append((self.NONE_LABEL+encoded_unary_leaf))
                 break
             
             explore_up_to = min( len(leaves_paths[j]), len(leaves_paths[j+1]) )+1   
             ni = 0
+
             for i in range(explore_up_to):   
                      
                 if leaves_paths[j][i] == leaves_paths[j+1][i]:
@@ -141,20 +159,33 @@ class RelativeLevelTreeEncoder(object):
                     if binarized:
                         relative_ni = relative_ni if relative_ni >=0 else -1
                         
-                    if encode_unary_leaf and "+" in unary_sequence[j]:
-                        encoded_unary_leaf = "_"+"+".join(unary_sequence[j].split("+")[:-1]) #The PoS tags is not encoded
+                    #NEWJOINT
+                    if encode_unary_leaf and self.join_char in unary_sequence[j]:
+                        encoded_unary_leaf = self.split_char+self.join_char.join(unary_sequence[j].split(self.join_char)[:-1]) #The PoS tags is not encoded
                     else:
                         encoded_unary_leaf = ""
+
                     
-                    if root_label and ni==1:
-                        sequence.append(self.ROOT_LABEL+"_"+leaves_paths[j][ni-1]+encoded_unary_leaf)
+                    #The root_label is activated and it is a top two level
+                    if (root_label and ni==1) or (abs_top is not None and 
+                                                  abs_neg_gap is not None and 
+                                                  root_label and ni < (abs_top+1) 
+                                                  and relative_ni <= abs_neg_gap): #and ni==1:
+
+           
+                        sequence.append(str(ni)+self.ROOT_LABEL+self.split_char+leaves_paths[j][ni-1].split(self.SPLIT_LABEL_SURNAME_SYMBOL)[0]+encoded_unary_leaf)
+                   #     sequence.append(str(ni)+self.ROOT_LABEL+"_"+leaves_paths[j][ni-1].split(self.SPLIT_LABEL_SURNAME_SYMBOL)[0]+encoded_unary_leaf)
+                        
                     else:
                         sequence.append(self._tag(relative_ni, leaves_paths[j][ni-1])+encoded_unary_leaf)
                     
                     previous_ni = ni
+                    previous_relative_ni = relative_ni
                     break
 
-        return sequence    
+        return sequence   
+
+    
     
         
     #TODO: It should be possible to remove this precondition
@@ -177,9 +208,12 @@ class RelativeLevelTreeEncoder(object):
                     child = child[-1]
                 
                 label = child.label()
-                if '+' in label:
-                     
-                    label_split = label.split('+')
+                #NEWJOINT
+                if self.join_char in label:
+
+                    #NEWJOINT
+                    label_split = label.split(self.join_char) 
+                    #label_split = label.split('+')
                     swap = Tree(label_split[0],[])
 
                     last_swap_level = swap
@@ -225,7 +259,9 @@ class RelativeLevelTreeEncoder(object):
     def preprocess_tags(self,pred):
         
         try:         
-            label = pred.split("_")
+            #NEWJOINT
+           # label = pred.split("_")
+            label = pred.split(self.split_char)
             level, label = label[0],label[1]  
             try:
                 return (int(level), label)
@@ -233,12 +269,16 @@ class RelativeLevelTreeEncoder(object):
                 
                 #It is a NONE label with a leaf unary chain
                 if level == self.NONE_LABEL: #or level == self.ROOT:
-                    return (None,pred.rsplit("_",1)[1])
+                    return (None,pred.rsplit(self.split_char,1)[1])
+#                if level == self.NONE_LABEL: #or level == self.ROOT:
+#                    return (None,pred.rsplit("_",1)[1])
                 
                 return (level,label)
             
         except IndexError:
             #It is a NONE label (without any leaf unary chains)
+#             if pred[0].isdigit() and self.ROOT_LABEL in pred:
+#                 return (0, "")
             return (None, pred)
         
         
@@ -260,6 +300,8 @@ class RelativeLevelTreeEncoder(object):
         sequence = map(self.preprocess_tags,sequence)
         sequence = self._to_absolute_encoding(sequence)      
 
+        printing = False
+         
         for j,(level,label) in enumerate(sequence):
 
             if level is None:
@@ -270,13 +312,17 @@ class RelativeLevelTreeEncoder(object):
                     prev_level-=1
           
                 #TODO: Trying optimitization
-                #It is a NONE label
                 if self.NONE_LABEL == label: #or self.ROOT_LABEL:
-                #if "NONE" == label:
                     previous_at.append( Tree( sentence[j][1],[ sentence[j][0]]) )
                 #It is a leaf unary chain
                 else:
-                    previous_at.append(Tree(label+"+"+sentence[j][1],[ sentence[j][0]]))   
+                    
+                    if label[0].isdigit() and self.ROOT_LABEL in label:
+                        previous_at.append(Tree(self.join_char+sentence[j][1],[ sentence[j][0]]))
+
+                    else:
+                        previous_at.append(Tree(label+self.join_char+sentence[j][1],[ sentence[j][0]]))   
+
                 return tree
                 continue
                    
@@ -310,7 +356,7 @@ class RelativeLevelTreeEncoder(object):
         return tree
 
 
-
+#D: New to_absolute_encoding function to consider both "top" and "down" encodings
     """
     Transforms an encoding of a tree in a relative scale into an
     encoding of the tree in an absolute scale.
@@ -323,21 +369,100 @@ class RelativeLevelTreeEncoder(object):
         
             if level is None:
                 absolute_sequence[j] = (level,phrase)
-            elif level == self.ROOT_LABEL:
-                absolute_sequence[j] = (1, phrase)
-                current_level+=1
+            elif type(level) == type("") and self.ROOT_LABEL in level:
+                
+                try:
+                    aux_level = int(level.replace(self.ROOT_LABEL,""))
+                    absolute_sequence[j] = (aux_level, phrase)
+                except ValueError:
+                    aux_level = 1
+                    absolute_sequence[j] = (aux_level,phrase)
+            #elif level == self.ROOT_LABEL:
+                #absolute_sequence[j] = (1, phrase)
+                current_level=aux_level
             else:                
                 current_level+= level
                 absolute_sequence[j] = (current_level,phrase)
         return absolute_sequence
-    
+
     
     def _tag(self,level,tag):
-        return str(level)+"_"+tag.rsplit("-",1)[0]
+        #NEWJOINT
+        return str(level)+self.split_char+tag.rsplit("*",1)[0]
+      #  return str(level)+"_"+tag.rsplit("-",1)[0]
+    
+    
+    
+    
+    
     
 
 
 
+class SyntacticDistanceEncoder(object):
     
     
+    def is_leaf(self, node):
+        return type(node) == type(u'') or type(node) == type("")
+            
+    
+    def rightmost_leaf(self, tree):
+        
+        if self.is_leaf(tree):
+            return tree
+        else:
+            return self.rightmost_leaf(tree[-1])
+    
+    def leftmost_leaf(self, tree):
+        
+        if self.is_leaf(tree):
+            return tree
+        else:
+            return self.leftmost_leaf(tree[0])
+        
+    
+    def _words_to_indices(self,tree, index=0, indexes=[]):
+        
+        if self.is_leaf(tree):
+            indexes.append(index)
+            return index+1
+        else:
+            for child in tree:
+
+                index = self._words_to_indices(child, index,indexes)
+            return index
+        
+        
+        
+#     def encode(self, tree):
+#          
+#         indexes = []
+#         self._words_to_indices(tree, 0, indexes)
+#         print indexes
+#         
+#         self._encode(tree)
+        
+    def encode(self, tree, labels, offset=0):
+        
+        #It is leaf
+        if self.is_leaf(tree):
+            labels.append(0)
+            return 0 #We return the current syntactic distances
+        else:
+            distances = []
+            for idchild, child in enumerate(tree):
+                
+                leaves_length = 1 if self.is_leaf(child) else len(child.leaves())   
+                len_left_children = sum([ len(c.leaves()) for c in tree[:idchild] ])
+                distances.append(self.encode(child, labels, offset = offset + len_left_children  ) )
+               
+            node_distance = max(distances)
+            #Update the labels here
+            index_rightmost_leaf = -1
+            for idchild, child in enumerate(tree[:-1],0):
+                index_rightmost_leaf+= len(tree[idchild].leaves())
+                labels[offset+index_rightmost_leaf] = node_distance
+            
+            return node_distance+1
+            
     
