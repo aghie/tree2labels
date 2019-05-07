@@ -155,12 +155,12 @@ if __name__ == '__main__':
                     if l.startswith("raw: time:")][0].split(",")[0].replace("raw: time:","").replace("s",""))
         raw_unary_time = 0
         #If we applied the retagging strategy, we also need to consider the time that it took to execute the retagger
-        if args.retagger:
-            log_lines_unary = codecs.open(path_tagger_log_unary).readlines()
-            raw_unary_time = float([l for l in log_lines_unary
-                        if l.startswith("raw: time:")][0].split(",")[0].replace("raw: time:","").replace("s",""))
-            os.remove("/tmp/"+decode_unary_fid)
-            os.remove("/tmp/"+fid)
+        #if args.retagger:
+        #    log_lines_unary = codecs.open(path_tagger_log_unary).readlines()
+        #    raw_unary_time = float([l for l in log_lines_unary
+        #                if l.startswith("raw: time:")][0].split(",")[0].replace("raw: time:","").replace("s",""))
+        #    os.remove("/tmp/"+decode_unary_fid)
+        #    os.remove("/tmp/"+fid)
         os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
         os.remove("/tmp/"+decode_fid)
 
