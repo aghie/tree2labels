@@ -9,7 +9,7 @@ TEST_PATH=../sample_data/cp_datasets/PTB_pred_tags/$TEST_NAME.trees
 USE_GPU=False
 EVALB=../EVALB/evalb
 OUTPUT=../outputs/
-MODELS=../parsing_models/ptb/
+MODELS=../pretrained_models_naacl2019/ptb/
 NCRFPP=$HOME_NCRFpp
 LOGS=../logs/
 
@@ -83,7 +83,7 @@ taskset --cpu-list 1 \
 python ../run_ncrfpp.py \
 --test $INPUT \
 --gold $TEST_PATH \
---model $HOME_NCRFpp/parsing_models/ptb-RL/ptb.RL.multitask.3R.-2.pre_lev \
+--model $MODELS/ptb.RL.multitask.3R.-2.pre_lev \
 --status test  \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb.RL.multitask.3R.-2.pre_lev.$TEST_NAME.$USE_GPU.txt  \
