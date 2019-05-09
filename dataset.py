@@ -137,7 +137,7 @@ if __name__ == '__main__':
     
     parser.add_argument("--output", dest="output", 
                         help="Path to the output directory to store the dataset", default=None, required=True)
-    parser.add_argument("--encode_unaries", action="store_true", dest="encode_unaries", help="Activate this option to encode the leaf unary chains as a part of the label")
+    parser.add_argument("--encode_unaries", action="store_true", dest="encode_unaries", help="Activate this option to encode the leaf unary chains as a part of the label", required=True)
     parser.add_argument("--os", action="store_true",help="Activate this option to add both a dummy beggining- (-BOS-) and an end-of-sentence (-EOS-) token to every sentence")
     parser.add_argument("--root_label", action="store_true", help="Activate this option to add a simplified root label to the nodes that are directly mapped to the root of the constituent tree",
                         default=False)

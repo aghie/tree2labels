@@ -12,5 +12,5 @@ wget http://grupolys.org/software/tree2labels-emnlp2018-resources/embeddings-EMN
 unzip embeddings-EMNLP2018 -d ./resources/
 
 echo "Downloading pretrained models"
-wget http://grupolys.org/software/tree2labels-emnlp2018-resources/models-EMNLP2018.zip .
-unzip models-EMNLP2018.zip
+wget http://www.grupolys.org/software/tree2labels-naacl2019-resources/pretrained_models_naacl2019.zip) .
+unzip pretrained_models_naacl2019.zip
