@@ -14,6 +14,7 @@ LOGS=../logs/
 #MULTITASK=True
 
 
+
 ###############################################
 #						   BASQUE MODELS
 ###############################################
@@ -537,7 +538,7 @@ python ../run_ncrfpp.py \
 
 
 
-
+'
 
 ################################################
 #								SWEDISH MODELS
@@ -547,7 +548,7 @@ python ../run_ncrfpp.py \
 INPUT=../sample_data/cp_datasets/swedish/swedish-$TEST_NAME.seq_lu
 PARENTHESIZED_TEST_PATH=../sample_data/cp_datasets/SWEDISH_pred_tags/$TEST_NAME.swedish.pred.ptb
 
-
+: '
 
 taskset --cpu-list 1 \
 python ../run_ncrfpp.py \
@@ -611,9 +612,6 @@ python ../run_ncrfpp.py \
 --evalb $EVALB \
 --multitask \
 --ncrfpp $NCRFPP #> $LOGS/swedish.ch.RL.multitask.3R.-2.dis$TEST_NAME.$USE_GPU.log 2>&1
-
-
-
 
 
 
