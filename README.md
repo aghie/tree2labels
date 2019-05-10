@@ -2,6 +2,7 @@
 
 This repository contains the source code from the paper "Constituent Parsing as Sequence Labeling". 
 
+For source code used in "Better, Faster, Stronger Sequence Tagging Constituent Parsers" checkout the [naacl-2019 branch](see https://github.com/aghie/tree2labels/tree/naacl-2019)
 ## Prerrequisites
 
 We **assume** and also **highly recommend** that you first **create a virtualenv** (e.g. `virtualenv $HOME/env/tree2labels`), so the requeriments for `tree2labels` do not interfere with other versions of packages that you might need for a different software.
