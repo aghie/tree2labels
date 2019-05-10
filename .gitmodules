@@ -1,3 +1,4 @@
 [submodule "NCRFpp"]
 	path = NCRFpp
-	url = https://github.com/aghie/NCRFpp
+	url = https://github.com/aghie/NCRFpp.git
+	branch = naacl-2019
