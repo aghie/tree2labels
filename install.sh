@@ -6,6 +6,7 @@ pip install scikit-learn==0.19.1
 pip install sklearn-crfsuite
 pip install h5py==2.7.1
 pip install torch==0.3.1
+pip install pytablewriter==0.46.1
 
 echo "Downloading external embeddings"
 wget http://grupolys.org/software/tree2labels-emnlp2018-resources/embeddings-EMNLP2018.zip .
