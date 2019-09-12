@@ -83,6 +83,7 @@ if __name__ == '__main__':
     arg_parser.add_argument("--output_unary", dest="output_unary", help="Use together with unary to store the output in the desired file")
     arg_parser.add_argument("--output_decode", dest="output_decode", help="Path to store the predicted trees", default="/tmp/trees.txt")
     arg_parser.add_argument("--evalb",dest="evalb",help="Path to the script EVALB")
+    arg_parser.add_argument("--evalb_param",dest="evalb_param",help="Path to the EVALB param file", default=None)
     arg_parser.add_argument("--gpu",dest="gpu",default="False")
     
     args = arg_parser.parse_args()
@@ -277,7 +278,10 @@ if __name__ == '__main__':
         parenthesized_trees = sequence_to_parenthesis(new_sentences,preds)
         final_time = time.time()
         tmpfile.write("\n".join(parenthesized_trees)+"\n")
-        os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
+        if args.evalb_param is None:
+             os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
+        else:
+             os.system(" ".join([args.evalb,"-p",args.evalb_param,args.gold, tmpfile.name]))
         gold_labels = [e[2] for e in flat_list(gold_samples)]
  
         if args.retagger:

@@ -44,6 +44,7 @@ if __name__ == '__main__':
     arg_parser.add_argument("--gpu",dest="gpu",default="False")
     arg_parser.add_argument("--output",dest="output",default="/tmp/trees.txt", required=True)
     arg_parser.add_argument("--evalb",dest="evalb",help="Path to the script EVALB")
+    arg_parser.add_argument("--evalb_param", dest="evalb_param", help="Path to the EVALB param file", default=None)
     arg_parser.add_argument("--ncrfpp", dest="ncrfpp", help="Path to the NCRFpp repository")
     
     args = arg_parser.parse_args()
@@ -186,7 +187,11 @@ if __name__ == '__main__':
                         if l.startswith("raw: time:")][0].split(",")[0].replace("raw: time:","").replace("s",""))
             os.remove("/tmp/"+decode_unary_fid)
             os.remove("/tmp/"+fid)
-        os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
+        
+        if args.evalb_param is None:
+            os.system(" ".join([args.evalb, args.gold, tmpfile.name]))
+        else:
+            os.system(" ".join([args.evalb,"-p",args.evalb_param,args.gold, tmpfile.name]))
         os.remove("/tmp/"+decode_fid)
 
         total_time = raw_time+raw_unary_time+end_posprocess_time+end_parenthesized_time+end_merge_retags_time
@@ -199,6 +204,7 @@ if __name__ == '__main__':
             flat_preds = flat_list(enriched_preds)
         else:
             flat_preds = flat_list(preds)
+
         print "Accuracy:  ",  round(accuracy_score(gold_labels, flat_preds),4)
 
 

@@ -1,18 +1,22 @@
 #Update this path to your virtual environment
-source /env/tree2labels/bin/activate
+#source /env/tree2labels/bin/activate
 
 
 TEST_NAME="test"
 INPUT=../dataset/ptb/ptb-$TEST_NAME.seq_lu
 TEST_PATH=../PTB_pred_tags/$TEST_NAME.trees
-USE_GPU=False
+USE_GPU=True
 EVALB=../EVALB/evalb
+EVALB_PARAM=../EVALB/COLLINS.prm
 OUTPUT=../output/
 MODELS=../models/
 NCRFPP=../NCRFpp/
 LOGS=../logs/
 
+
+
 #ENRICHED
+
 
 taskset --cpu-list 1 \
 python ../run_ncrfpp.py \
@@ -23,7 +27,9 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb-bilstm2-chlstm-glove.enriched.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.enriched.bilstm2.chlstm.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
 
 
 taskset --cpu-list 1 \
@@ -35,7 +41,10 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb-bilstm2-glove.enriched.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.enriched.bilstm2.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
+
 
 
 taskset --cpu-list 1 \
@@ -47,6 +56,7 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb-bilstm1-chlstm-glove.enriched.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.enriched.bilstm1.chlstm.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
 
 
@@ -59,7 +69,9 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb-bilstm1-glove.enriched.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.enriched.bilstm1.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
 
 
 taskset --cpu-list 1 \
@@ -71,7 +83,9 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --output $OUTPUT/ptb-bilstm1.enriched.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.enriched.bilstm1.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
 
 
 #RETAGGER
@@ -86,6 +100,7 @@ python ../run_ncrfpp.py \
 --retagger \
 --output $OUTPUT/ptb-bilstm2-chlstm-glove.retagged.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.retagger.bilstm2.chlstm.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
 
 
@@ -99,7 +114,9 @@ python ../run_ncrfpp.py \
 --retagger \
 --output $OUTPUT/ptb-bilstm2-glove.retagged.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.retagger.bilstm2.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
 
 
 taskset --cpu-list 1 \
@@ -112,6 +129,7 @@ python ../run_ncrfpp.py \
 --retagger \
 --output $OUTPUT/ptb-bilstm1-chlstm-glove.retagged.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.retagger.bilstm1.chlstm.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
 
 
@@ -125,7 +143,9 @@ python ../run_ncrfpp.py \
 --retagger \
 --output $OUTPUT/ptb-bilstm1-glove.retagged.$TEST_NAME.txt \
 --evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.retagger.bilstm1.glove.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
 
 
 taskset --cpu-list 1 \
@@ -137,5 +157,8 @@ python ../run_ncrfpp.py \
 --gpu $USE_GPU \
 --retagger \
 --output $OUTPUT/ptb-bilstm1.retagged.$TEST_NAME.txt \
---evalb $EVALB  \
+--evalb $EVALB \
+--evalb_param $EVALB_PARAM \
 --ncrfpp $NCRFPP > $LOGS/ptb.retagger.bilstm1.cores=1.nogpu=$USE_GPU.$TEST_NAME.log 2>&1
+
+
