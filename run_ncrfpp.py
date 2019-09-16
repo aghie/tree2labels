@@ -48,7 +48,9 @@ if __name__ == '__main__':
     arg_parser.add_argument("--multitask", dest="multitask", default=False, action="store_true")
     arg_parser.add_argument("--output",dest="output",default="/tmp/trees.txt", required=True)
     arg_parser.add_argument("--evalb",dest="evalb",help="Path to the script EVALB")
+    arg_parser.add_argument("--evalb_param",dest="evalb_param",help="Path to the EVALB param file (e.g. COLLINS.prm")
     arg_parser.add_argument("--ncrfpp", dest="ncrfpp", help="Path to the NCRFpp repository")
+
     
     args = arg_parser.parse_args()
     
@@ -161,7 +163,13 @@ if __name__ == '__main__':
         #                if l.startswith("raw: time:")][0].split(",")[0].replace("raw: time:","").replace("s",""))
         #    os.remove("/tmp/"+decode_unary_fid)
         #    os.remove("/tmp/"+fid)
-        os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
+        #os.system(" ".join([args.evalb,"-p /home/david.vilares/Escritorio/proof-tree2labels/tree2labels/EVALB/COLLINS.prm",args.gold, tmpfile.name]))
+      
+
+        if args.evalb_param is None:
+            os.system(" ".join([args.evalb,args.gold, tmpfile.name]))
+        else:
+            os.system(" ".join([args.evalb,"-p",args.evalb_param,args.gold, tmpfile.name]))
         os.remove("/tmp/"+decode_fid)
 
         total_time = raw_time+raw_unary_time+end_posprocess_time+end_parenthesized_time+end_merge_retags_time
