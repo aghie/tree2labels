@@ -150,5 +150,9 @@ python main.py --config resources/NCRF_config/train_enriched/a-training-configur
 
 Gómez-Rodríguez, Carlos and Vilares, David. "Constituent Parsing as Sequence Labeling". To appear in EMNLP 2018. 
 
+## Acknowledgements
+
+This work has received funding from the European Research Council (ERC), under the European Union's Horizon 2020 research and innovation programme (FASTPARSE, grant agreement No 714150).
+
 ## Contact
 If you have any suggestion, inquiry or bug to report, please contact david.vilares@udc.es
