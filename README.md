@@ -177,6 +177,10 @@ entropy_regularisation=True
 entropy_reg_coeff=0.01
 ```
 
+## Acknowledgements
+
+This work has received funding from the European Research Council (ERC), under the European Union's Horizon 2020 research and innovation programme (FASTPARSE, grant agreement No 714150).
+
 ## References
 
 - Vilares, David and Abdou, Mostafa and Søgaard, Anders. "Better, Faster, Stronger Sequence Tagging Constituent Parsers". NAACL 2019.
